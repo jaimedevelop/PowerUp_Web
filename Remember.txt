@@ -1,0 +1,9 @@
+Files that were not found or had issues:
+- Services directory - No existing service files found to move
+- Hooks directory - No existing hook files found to move
+- Types directory - No existing type files found to move
+- Constants directory - No existing constant files found to move
+- Firebase database.js - Referenced in MeetDashboard.tsx but not found in the expected location
+- Types/meets.ts - Referenced in MeetCard.tsx and MeetDashboard.tsx but not found in the expected location
+
+These will need to be addressed in a future update or created as needed.

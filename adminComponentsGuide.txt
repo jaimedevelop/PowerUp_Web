@@ -1,0 +1,743 @@
+PowerUp Admin Components Integration Guide
+This document provides a comprehensive mapping of all admin components to their respective pages and guidance for integrating them with the actual page files.
+
+📋 Table of Contents
+Dashboard Page Integration
+Meets Page Integration
+Live Meet Page Integration
+Finances Page Integration
+Communications Page Integration
+Reports Page Integration
+Settings Page Integration
+Shared Components
+Integration Best Practices
+📊 Dashboard Page Integration
+Page File: src/admin/pages/DashboardPage.tsx
+
+Current Implementation Status
+The dashboard page is partially implemented with basic components. Here's how to integrate the full component suite:
+
+Required Component Imports
+import { FinancialSummary } from '../components/dashboard/FinancialSummary';
+import { LiveMeetStatus } from '../components/dashboard/LiveMeetStatus';
+import { NotificationCenter } from '../components/dashboard/NotificationCenter';
+import { QuickActions } from '../components/dashboard/QuickActions';
+import { RecentRegistrations } from '../components/dashboard/RecentRegistrations';
+import { UpcomingMeetsCard } from '../components/dashboard/UpcomingMeetsCard';
+
+typescript
+
+
+Integration Code
+// Replace the existing DashboardPage.tsx content with:
+
+export const DashboardPage: React.FC = () => {
+  return (
+    <div className="space-y-8">
+      <PageHeader
+        title="Dashboard"
+        subtitle="Welcome back! Here's what's happening with your meets."
+        icon={LayoutDashboard}
+      />
+
+      {/* Stats Overview - Keep existing StatCards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Existing StatCards */}
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column */}
+        <div className="lg:col-span-2 space-y-8">
+          <FinancialSummary />
+          <UpcomingMeetsCard />
+          <RecentRegistrations />
+          <QuickActions />
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-8">
+          <LiveMeetStatus />
+          <NotificationCenter />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+typescript
+
+
+
+🏆 Meets Page Integration
+Page File: src/admin/pages/MeetsPage.tsx
+
+Current Implementation Status
+The meets page is well-implemented with the creation wizard. Here's the complete component mapping:
+
+Required Component Imports
+import { MeetsList } from '../components/meets/MeetsList';
+import { CreateMeetWizard } from '../components/meets/CreateMeetWizard';
+import { MeetDashboard } from '../components/meets/MeetDashboard';
+import { MeetOverview } from '../components/meets/MeetOverview';
+import { MeetFilters } from '../components/meets/MeetFilters';
+import { SearchMeets } from '../components/meets/SearchMeets';
+import { MeetTemplates } from '../components/meets/MeetTemplates';
+import { FlightOrganization } from '../components/meets/FlightOrganization';
+import { RegistrationManagement } from '../components/meets/RegistrationManagement';
+
+typescript
+
+
+
+Enhanced Integration Code
+// Add to existing MeetsPage.tsx:
+
+type MeetsPageView = 'list' | 'create' | 'edit' | 'dashboard' | 'manage';
+
+export const MeetsPage: React.FC = () => {
+  const [currentView, setCurrentView] = useState<MeetsPageView>('list');
+  const [selectedMeetId, setSelectedMeetId] = useState<string | null>(null);
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'create':
+        return <CreateMeetWizard onComplete={() => setCurrentView('list')} />;
+      
+      case 'edit':
+        return (
+          <CreateMeetWizard 
+            editMode={true} 
+            meetId={selectedMeetId} 
+            onComplete={() => setCurrentView('list')} 
+          />
+        );
+      
+      case 'dashboard':
+        return (
+          <div className="space-y-6">
+            <button onClick={() => setCurrentView('list')} className="mb-4">
+              ← Back to Meets
+            </button>
+            <MeetDashboard meetId={selectedMeetId} />
+          </div>
+        );
+      
+      case 'manage':
+        return (
+          <div className="space-y-6">
+            <button onClick={() => setCurrentView('list')} className="mb-4">
+              ← Back to Meets
+            </button>
+            <MeetOverview meetId={selectedMeetId} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <FlightOrganization meetId={selectedMeetId} />
+              <RegistrationManagement meetId={selectedMeetId} />
+            </div>
+          </div>
+        );
+      
+      case 'list':
+      default:
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <SearchMeets />
+              <button onClick={() => setCurrentView('create')}>
+                Create New Meet
+              </button>
+            </div>
+            <MeetFilters />
+            <MeetTemplates />
+            <MeetsList 
+              onCreateMeet={() => setCurrentView('create')}
+              onEditMeet={(meetId) => {
+                setSelectedMeetId(meetId);
+                setCurrentView('edit');
+              }}
+              onViewDashboard={(meetId) => {
+                setSelectedMeetId(meetId);
+                setCurrentView('dashboard');
+              }}
+              onManageMeet={(meetId) => {
+                setSelectedMeetId(meetId);
+                setCurrentView('manage');
+              }}
+            />
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <PageHeader title="Meets" subtitle="Manage your powerlifting competitions" icon={Trophy} />
+      {renderContent()}
+    </div>
+  );
+};
+
+typescript
+
+
+
+🎙️ Live Meet Page Integration
+Page File: src/admin/pages/LiveMeetPage.tsx
+
+Current Implementation Status
+The live meet page has a basic implementation but needs the full component suite integrated.
+
+Required Component Imports
+import { LiveMeetDashboard } from '../components/live/LiveMeetDashboard';
+import { LiveMeetSelector } from '../components/live/LiveMeetSelector';
+import { MeetDaySetup } from '../components/live/MeetDaySetup';
+import { FlightControl } from '../components/live/FlightControl';
+import { AttemptTracking } from '../components/live/AttemptTracking';
+import { TimerManagement } from '../components/live/TimerManagement';
+import { ScoreboardDisplay } from '../components/live/ScoreboardDisplay';
+import { LiveMeetCommunication } from '../components/live/LiveMeetCommunication';
+import { AnnouncementCenter } from '../components/live/AnnouncementCenter';
+
+typescript
+
+
+
+Enhanced Integration Code
+// Replace existing LiveMeetPage.tsx with:
+
+type LiveMeetView = 'selector' | 'setup' | 'live' | 'communication';
+
+export const LiveMeetPage: React.FC = () => {
+  const [currentView, setCurrentView] = useState<LiveMeetView>('selector');
+  const [selectedMeetId, setSelectedMeetId] = useState<string | null>(null);
+
+  const renderContent = () => {
+    switch (currentView) {
+      case 'selector':
+        return (
+          <LiveMeetSelector 
+            onSelectMeet={(meetId) => {
+              setSelectedMeetId(meetId);
+              setCurrentView('setup');
+            }}
+          />
+        );
+      
+      case 'setup':
+        return (
+          <div className="space-y-6">
+            <button onClick={() => setCurrentView('selector')} className="mb-4">
+              ← Back to Meet Selection
+            </button>
+            <MeetDaySetup 
+              meetId={selectedMeetId}
+              onStartMeet={() => setCurrentView('live')}
+            />
+          </div>
+        );
+      
+      case 'live':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <button onClick={() => setCurrentView('setup')} className="mb-4">
+                ← Back to Setup
+              </button>
+              <button onClick={() => setCurrentView('communication')}>
+                Communications
+              </button>
+            </div>
+            <LiveMeetDashboard meetId={selectedMeetId}>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                  <FlightControl meetId={selectedMeetId} />
+                  <AttemptTracking meetId={selectedMeetId} />
+                  <TimerManagement meetId={selectedMeetId} />
+                </div>
+                <div className="space-y-6">
+                  <ScoreboardDisplay meetId={selectedMeetId} />
+                  <AnnouncementCenter meetId={selectedMeetId} />
+                </div>
+              </div>
+            </LiveMeetDashboard>
+          </div>
+        );
+      
+      case 'communication':
+        return (
+          <div className="space-y-6">
+            <button onClick={() => setCurrentView('live')} className="mb-4">
+              ← Back to Live Meet
+            </button>
+            <LiveMeetCommunication meetId={selectedMeetId} />
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <PageHeader
+        title="Live Meet"
+        subtitle="Real-time meet day operations and control"
+        icon={Radio}
+      />
+      {renderContent()}
+    </div>
+  );
+};
+
+typescript
+
+
+
+💰 Finances Page Integration
+Page File: src/admin/pages/FinancesPage.tsx
+
+Current Implementation Status
+The finances page has basic UI but needs the full component suite integrated.
+
+Required Component Imports
+import { FinancialOverview } from '../components/finances/FinancialOverview';
+import { FinancialReports } from '../components/finances/FinancialReports';
+import { PaymentProcessing } from '../components/finances/PaymentProcessing';
+import { RefundManagement } from '../components/finances/RefundManagement';
+import { RevenueMetrics } from '../components/finances/RevenueMetrics';
+import { RegistrationFinances } from '../components/finances/RegistrationFinances';
+import { ExpenseTracking } from '../components/finances/ExpenseTracking';
+import { VendorFinances } from '../components/finances/VendorFinances';
+
+typescript
+
+
+
+Enhanced Integration Code
+// Replace existing FinancesPage.tsx with:
+
+type FinancesTab = 'overview' | 'payments' | 'refunds' | 'reports' | 'expenses';
+
+export const FinancesPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<FinancesTab>('overview');
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <div className="space-y-6">
+            <FinancialOverview />
+            <RevenueMetrics />
+            <RegistrationFinances />
+          </div>
+        );
+      
+      case 'payments':
+        return <PaymentProcessing />;
+      
+      case 'refunds':
+        return <RefundManagement />;
+      
+      case 'reports':
+        return <FinancialReports />;
+      
+      case 'expenses':
+        return (
+          <div className="space-y-6">
+            <ExpenseTracking />
+            <VendorFinances />
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <PageHeader
+        title="Finances"
+        subtitle="Track revenue, payments, and financial performance"
+        icon={DollarSign}
+      />
+
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 bg-slate-900 rounded-lg p-1">
+        {[
+          { id: 'overview', label: 'Overview' },
+          { id: 'payments', label: 'Payments' },
+          { id: 'refunds', label: 'Refunds' },
+          { id: 'reports', label: 'Reports' },
+          { id: 'expenses', label: 'Expenses' }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as FinancesTab)}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {renderTabContent()}
+    </div>
+  );
+};
+
+typescript
+
+
+
+📧 Communications Page Integration
+Page File: src/admin/pages/CommunicationsPage.tsx
+
+Current Implementation Status
+The communications page is minimally implemented. Here's the full integration:
+
+Required Component Imports
+import { CommunicationCenter } from '../components/communications/CommunicationCenter';
+import { MessageCenter } from '../components/communications/MessageCenter';
+import { MessageHistory } from '../components/communications/MessageHistory';
+import { BulkCommunication } from '../components/communications/BulkCommunication';
+import { CommunicationTemplates } from '../components/communications/CommunicationTemplates';
+import { EmailTemplate } from '../components/communications/EmailTemplate';
+import { AthleteMessaging } from '../components/communications/AthleteMessaging';
+
+typescript
+
+
+
+Enhanced Integration Code
+// Replace existing CommunicationsPage.tsx with:
+
+type CommunicationsTab = 'center' | 'messages' | 'bulk' | 'templates' | 'athletes';
+
+export const CommunicationsPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<CommunicationsTab>('center');
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'center':
+        return <CommunicationCenter />;
+      
+      case 'messages':
+        return (
+          <div className="space-y-6">
+            <MessageCenter />
+            <MessageHistory />
+          </div>
+        );
+      
+      case 'bulk':
+        return <BulkCommunication />;
+      
+      case 'templates':
+        return (
+          <div className="space-y-6">
+            <CommunicationTemplates />
+            <EmailTemplate />
+          </div>
+        );
+      
+      case 'athletes':
+        return <AthleteMessaging />;
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <PageHeader
+        title="Communications"
+        subtitle="Send updates and messages to athletes and participants"
+        icon={MessageSquare}
+      />
+
+      {/* Tab Navigation */}
+      <div className="flex space-x-1 bg-slate-900 rounded-lg p-1">
+        {[
+          { id: 'center', label: 'Communication Center' },
+          { id: 'messages', label: 'Messages' },
+          { id: 'bulk', label: 'Bulk Messages' },
+          { id: 'templates', label: 'Templates' },
+          { id: 'athletes', label: 'Athlete Messaging' }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as CommunicationsTab)}
+            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {renderTabContent()}
+    </div>
+  );
+};
+
+typescript
+
+
+
+📊 Reports Page Integration
+Page File: src/admin/pages/ReportsPage.tsx
+
+Current Implementation Status
+The reports page has partial implementation. Here's the full integration:
+
+Required Component Imports
+import { ReportGenerator } from '../components/reports/ReportGenerator';
+import { ReportExport } from '../components/reports/ReportExport';
+import { ParticipationReports } from '../components/reports/ParticipationReports';
+import { PerformanceReports } from '../components/reports/PerformanceReports';
+import { RegistrationAnalytics } from '../components/reports/RegistrationAnalytics';
+import { OperationalReports } from '../components/reports/OperationalReports';
+
+typescript
+
+
+Enhanced Integration Code
+// Add to existing ReportsPage.tsx:
+
+type ReportsTab = 'generator' | 'participation' | 'performance' | 'registration' | 'operational' | 'financial';
+
+export const ReportsPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<ReportsTab>('generator');
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'generator':
+        return (
+          <div className="space-y-6">
+            <ReportGenerator />
+            <ReportExport />
+          </div>
+        );
+      
+      case 'participation':
+        return <ParticipationReports />;
+      
+      case 'performance':
+        return <PerformanceReports />;
+      
+      case 'registration':
+        return <RegistrationAnalytics />;
+      
+      case 'operational':
+        return <OperationalReports />;
+      
+      case 'financial':
+        // Keep existing financial tab content
+        return (
+          <div className="space-y-6">
+            {/* Existing financial content */}
+          </div>
+        );
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <PageHeader
+        title="Reports & Analytics"
+        subtitle="Generate insights and track performance metrics"
+        icon={FileText}
+        actions={
+          <Button className="flex items-center space-x-2">
+            <Download size={16} />
+            <span>Export All Data</span>
+          </Button>
+        }
+      />
+
+      {/* Quick Stats - Keep existing */}
+
+      {/* Report Navigation */}
+      <div className="flex flex-wrap gap-2 bg-slate-900 rounded-lg p-2">
+        {[
+          { id: 'generator', label: 'Report Generator' },
+          { id: 'participation', label: 'Participation' },
+          { id: 'performance', label: 'Performance' },
+          { id: 'registration', label: 'Registration' },
+          { id: 'operational', label: 'Operational' },
+          { id: 'financial', label: 'Financial' }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as ReportsTab)}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {renderTabContent()}
+    </div>
+  );
+};
+
+typescript
+
+
+
+⚙️ Settings Page Integration
+Page File: src/admin/pages/SettingsPage.tsx
+
+Current Implementation Status
+The settings page has good implementation but can be enhanced with additional components.
+
+Required Component Imports
+import { ProfileSettings } from '../components/settings/ProfileSettings';
+import { IntegrationSettings } from '../components/settings/IntegrationSettings';
+import { SecuritySettings } from '../components/settings/SecuritySettings';
+import { SystemSettings } from '../components/settings/SystemSettings';
+import { MeetDefaults } from '../components/settings/MeetDefaults';
+
+typescript
+
+
+Enhanced Integration Code
+// Add to existing SettingsPage.tsx:
+
+type SettingsTab = 'profile' | 'integrations' | 'security' | 'system' | 'meet-defaults' | 'notifications';
+
+export const SettingsPage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'profile':
+        return <ProfileSettings />;
+      
+      case 'integrations':
+        return <IntegrationSettings />;
+      
+      case 'security':
+        return <SecuritySettings />;
+      
+      case 'system':
+        return <SystemSettings />;
+      
+      case 'meet-defaults':
+        return <MeetDefaults />;
+      
+      case 'notifications':
+        // Keep existing notifications content
+        return (
+          <Card>
+            {/* Existing notifications content */}
+          </Card>
+        );
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <PageHeader
+        title="Settings"
+        subtitle="Manage your account and preferences"
+        icon={Settings}
+      />
+
+      {/* Settings Navigation */}
+      <div className="flex flex-wrap gap-2 bg-slate-900 rounded-lg p-2">
+        {[
+          { id: 'profile', label: 'Profile' },
+          { id: 'integrations', label: 'Integrations' },
+          { id: 'security', label: 'Security' },
+          { id: 'system', label: 'System' },
+          { id: 'meet-defaults', label: 'Meet Defaults' },
+          { id: 'notifications', label: 'Notifications' }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as SettingsTab)}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Settings Content */}
+      {renderTabContent()}
+    </div>
+  );
+};
+
+typescript
+
+
+
+🔄 Shared Components
+All shared components are located in src/admin/components/shared/ and should be imported as needed:
+
+import { PageHeader } from '../components/shared/PageHeader';
+import { Card } from '../components/shared/Card';
+import { Button } from '../components/shared/Button';
+import { StatCard } from '../components/shared/StatCard';
+import { EmptyState } from '../components/shared/EmptyState';
+import { LoadingSpinner } from '../components/shared/LoadingSpinner';
+
+typescript
+
+
+🎯 Integration Best Practices
+1. State Management
+Use React hooks for local state management
+Consider implementing a global state solution (Redux, Zustand) for complex state sharing
+Implement proper loading states and error handling
+2. Data Flow
+Components should receive data via props
+Use callback functions for child-to-parent communication
+Implement proper TypeScript interfaces for props
+3. Performance Optimization
+Implement React.memo for expensive components
+Use useCallback and useMemo hooks appropriately
+Consider code splitting for large components
+4. Accessibility
+Ensure all interactive elements have proper ARIA labels
+Implement keyboard navigation support
+Use semantic HTML elements
+5. Responsive Design
+Test all components on mobile, tablet, and desktop
+Use Tailwind's responsive utilities appropriately
+Ensure touch targets are adequate on mobile
+6. Error Handling
+Implement proper error boundaries
+Show user-friendly error messages
+Provide recovery options when possible
+7. Loading States
+Show loading indicators for async operations
+Implement skeleton screens for better UX
+Handle empty states gracefully
+📝 Implementation Checklist
+ Update DashboardPage.tsx with full component integration
+ Enhance MeetsPage.tsx with additional views
+ Complete LiveMeetPage.tsx with all live components
+ Upgrade FinancesPage.tsx with tabbed interface
+ Expand CommunicationsPage.tsx with full messaging suite
+ Enhance ReportsPage.tsx with comprehensive reporting
+ Complete SettingsPage.tsx with all configuration options
+ Test all integrations on different screen sizes
+ Implement proper error handling and loading states
+ Add TypeScript interfaces for all component props
+This integration guide provides a comprehensive roadmap for implementing all admin components with their respective pages. Each section includes the necessary imports, integration code, and best practices for a successful implementation.

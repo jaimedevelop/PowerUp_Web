@@ -1,21 +1,39 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Layout } from './components/Navigation';
-import { AdminLayout } from './admin/components/AdminLayout';
-import { FeedPage } from './pages/FeedPage';
-import { CompetePage } from './pages/CompetePage';
-import { TrainPage } from './pages/TrainPage';
-import { ConnectPage } from './pages/ConnectPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { MeetsPage } from './admin/pages/MeetsPage';
-import MeetDashboard from './admin/components/meets/MeetDashboard';
+import { Layout } from './features/athlete/components/Navigation';
+import { AdminLayout } from './features/admin/components/AdminLayout';
+import { FeedPage } from './features/athlete/pages/FeedPage';
+import { CompetePage } from './features/athlete/pages/CompetePage';
+import { TrainPage } from './features/athlete/pages/TrainPage';
+import { ConnectPage } from './features/athlete/pages/ConnectPage';
+import { SettingsPage } from './features/admin/pages/SettingsPage';
+import { DashboardPage } from './features/admin/pages/DashboardPage';
+import { MeetsPage } from './features/admin/pages/MeetsPage';
+import { LiveMeetPage } from './features/admin/pages/LiveMeetPage';
+import { FinancesPage } from './features/admin/pages/FinancesPage';
+import { CommunicationsPage } from './features/admin/pages/CommunicationsPage';
+import { ReportsPage } from './features/admin/pages/ReportsPage';
+import { SettingsPage as AdminSettingsPage } from './features/admin/pages/SettingsPage';
+import MeetDashboard from './features/admin/components/meets/MeetDashboard';
+import { EditMeet } from './features/admin/components/meets/EditMeet';
+import MeetDetailsPage from './features/athlete/components/compete/MeetDetailsPage';
+import LandingPage from './features/athlete/pages/LandingPage';
+import LoginPage from './features/shared/auth/LoginPage';
+import CreateAccountPage from './features/shared/auth/CreateAccountPage';
+import { AuthProvider } from './contexts/shared/AuthContext';
 
 function App() {
   return (
+    <AuthProvider>
     <Router>
       <Routes>
+        {/* Authentication Routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/create-account/:userType" element={<CreateAccountPage />} />
+        
         {/* Main App Routes - Use the Layout component */}
-        <Route path="/" element={
+        <Route path="/feed" element={
           <Layout>
             <FeedPage />
           </Layout>
@@ -23,6 +41,11 @@ function App() {
         <Route path="/compete" element={
           <Layout>
             <CompetePage />
+          </Layout>
+        } />
+        <Route path="/compete/meet/:meetId" element={
+          <Layout>
+            <MeetDetailsPage />
           </Layout>
         } />
         <Route path="/train" element={
@@ -37,14 +60,14 @@ function App() {
         } />
         <Route path="/profile" element={
           <Layout>
-            <ProfilePage />
+            <SettingsPage />
           </Layout>
         } />
         
         {/* Admin Director Routes - Individual routes wrapped in AdminLayout */}
         <Route path="/admin/director/dashboard" element={
           <AdminLayout>
-            <div className="text-white">Dashboard Coming Soon</div>
+            <DashboardPage />
           </AdminLayout>
         } />
         <Route path="/admin/director/meets" element={
@@ -57,40 +80,46 @@ function App() {
             <MeetDashboard />
           </AdminLayout>
         } />
+        <Route path="/admin/director/meets/:meetId/edit" element={
+          <AdminLayout>
+            <EditMeet onComplete={() => window.history.back()} />
+          </AdminLayout>
+        } />
         <Route path="/admin/director/live" element={
           <AdminLayout>
-            <div className="text-white">Live Meet Coming Soon</div>
+            <LiveMeetPage />
           </AdminLayout>
         } />
         <Route path="/admin/director/finances" element={
           <AdminLayout>
-            <div className="text-white">Finances Coming Soon</div>
+            <FinancesPage />
           </AdminLayout>
         } />
         <Route path="/admin/director/communications" element={
           <AdminLayout>
-            <div className="text-white">Communications Coming Soon</div>
+            <CommunicationsPage />
           </AdminLayout>
         } />
         <Route path="/admin/director/reports" element={
           <AdminLayout>
-            <div className="text-white">Reports Coming Soon</div>
+            <ReportsPage />
           </AdminLayout>
         } />
         <Route path="/admin/director/settings" element={
           <AdminLayout>
-            <div className="text-white">Settings Coming Soon</div>
+            <AdminSettingsPage />
           </AdminLayout>
         } />
         
-        {/* Redirect /admin and /admin/director to meets */}
-        <Route path="/admin" element={<Navigate to="/admin/director/meets" replace />} />
-        <Route path="/admin/director" element={<Navigate to="/admin/director/meets" replace />} />
+        {/* Redirect /admin and /admin/director to dashboard */}
+        <Route path="/admin" element={<Navigate to="/admin/director/dashboard" replace />} />
+        <Route path="/admin/director" element={<Navigate to="/admin/director/dashboard" replace />} />
         
         {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
+    </AuthProvider>
   );
 }
 
