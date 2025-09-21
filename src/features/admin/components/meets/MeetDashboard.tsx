@@ -106,8 +106,8 @@ const MeetDashboard: React.FC<MeetDashboardProps> = ({ onEdit }) => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'registrations', label: 'Registrations', icon: UserCheck },
-    { id: 'flights', label: 'Flights', icon: Users },
     { id: 'weigh-in', label: 'Weigh-In', icon: Scale },
+    { id: 'flights', label: 'Flights', icon: Users },
     { id: 'communications', label: 'Communications', icon: MessageSquare },
     { id: 'live', label: 'Live', icon: Zap },
     { id: 'reports', label: 'Reports', icon: BarChart3 }

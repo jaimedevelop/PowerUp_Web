@@ -1,48 +1,201 @@
-import React, { useState } from 'react';
-import { User, BarChart3, Trophy, Award, Settings } from 'lucide-react';
+// src/pages/ProfilePage.tsx
+import React, { useState, useEffect } from 'react';
+import { User, BarChart3, Trophy, Award, Settings, AlertCircle } from 'lucide-react';
 import { ProfileHeader } from '../components/profile/ProfileHeader';
 import { StatsTab } from '../components/profile/StatsTab';
 import { CompetitionHistoryTab } from '../components/profile/CompetitionHistoryTab';
 import { AchievementsTab } from '../components/profile/AchievementsTab';
 import { SettingsTab } from '../components/profile/SettingsTab';
+import { useAuth } from '../../../contexts/shared/AuthContext';
+import { updateUserProfile, hasRequiredRegistrationInfo, getMissingRegistrationFields } from '../../../services/shared/auth';
 
 type TabType = 'stats' | 'competition-history' | 'achievements' | 'settings';
 
 export const ProfilePage: React.FC = () => {
+  const { userProfile, currentUser, refreshProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('stats');
-  const [profileData, setProfileData] = useState({
-    name: 'Alex Johnson',
-    username: '@alexlifts',
-    bio: 'Passionate PowerUper chasing that 1500 total 💪',
-    location: 'Austin, TX',
-    email: 'alex@example.com',
-    phone: '+1 (555) 123-4567',
-    weightClass: '83kg',
-    division: 'Open',
-    federation: 'USAPL',
-    coach: 'Sarah Johnson',
-    gym: 'Iron Palace Gym'
-  });
+  const [loading, setLoading] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+  const [missingFields, setMissingFields] = useState<string[]>([]);
 
+  // Check for missing registration fields
+  useEffect(() => {
+    if (userProfile) {
+      const missing = getMissingRegistrationFields(userProfile);
+      setMissingFields(missing);
+    }
+  }, [userProfile]);
+
+  // Initialize profile data from userProfile
+  const initializeProfileData = (profile: any) => {
+    if (!profile) return null;
+    
+    return {
+      name: profile.displayName || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || '',
+      username: profile.username || '',
+      bio: profile.bio || '',
+      location: profile.location || '',
+      email: profile.email || '',
+      phone: profile.phone || '',
+      weightClass: profile.weightClass || '83kg',
+      division: profile.division || 'Open',
+      federation: profile.federation || 'USAPL',
+      coach: profile.coach || '',
+      gym: profile.gym || '',
+      
+      // Required for meet registration
+      dateOfBirth: profile.dateOfBirth ? new Date(profile.dateOfBirth).toISOString().split('T')[0] : '',
+      gender: profile.gender || '',
+      
+      // Emergency Contact
+      emergencyContact: profile.emergencyContact || {
+        name: '',
+        phone: '',
+        relationship: '',
+        email: ''
+      },
+      
+      // Federation Membership
+      federationMembership: profile.federationMembership ? {
+        federation: profile.federationMembership.federation || '',
+        membershipNumber: profile.federationMembership.membershipNumber || '',
+        expirationDate: profile.federationMembership.expirationDate ? 
+          new Date(profile.federationMembership.expirationDate).toISOString().split('T')[0] : ''
+      } : {
+        federation: '',
+        membershipNumber: '',
+        expirationDate: ''
+      },
+      
+      // Coach Info (if applicable)
+      coachPhone: profile.coachPhone || '',
+      coachPowerUpUsername: profile.coachPowerUpUsername || '',
+      teamName: profile.teamName || '',
+      teamPowerUpUsername: profile.teamPowerUpUsername || ''
+    };
+  };
+
+  // Profile data state
+  const [profileData, setProfileData] = useState(() => 
+    initializeProfileData(userProfile) || {
+      name: '',
+      username: '',
+      bio: '',
+      location: '',
+      email: '',
+      phone: '',
+      weightClass: '83kg',
+      division: 'Open',
+      federation: 'USAPL',
+      coach: '',
+      gym: '',
+      dateOfBirth: '',
+      gender: '',
+      emergencyContact: {
+        name: '',
+        phone: '',
+        relationship: '',
+        email: ''
+      },
+      federationMembership: {
+        federation: '',
+        membershipNumber: '',
+        expirationDate: ''
+      },
+      coachPhone: '',
+      coachPowerUpUsername: '',
+      teamName: '',
+      teamPowerUpUsername: ''
+    }
+  );
+
+  // Notifications state
   const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    sms: false,
-    workoutReminders: true,
-    competitionUpdates: true,
-    socialActivity: false,
-    coachMessages: true
+    email: userProfile?.notifications?.email ?? true,
+    push: userProfile?.notifications?.push ?? true,
+    workoutReminders: userProfile?.notifications?.workoutReminders ?? true,
+    coachMessages: userProfile?.notifications?.coachMessages ?? true
   });
 
+  // Privacy state
   const [privacy, setPrivacy] = useState({
-    profilePublic: true,
-    statsPublic: true,
-    competitionHistory: true,
-    workoutData: false
+    profilePublic: userProfile?.privacy?.profilePublic ?? true,
+    statsPublic: userProfile?.privacy?.statsPublic ?? true,
+    competitionHistory: userProfile?.privacy?.competitionHistory ?? true
   });
 
-  const [theme, setTheme] = useState('dark');
+  // Theme state
+  const [theme, setTheme] = useState(userProfile?.theme || 'dark');
+  
+  // Update states when userProfile changes (e.g., after refresh or auth state change)
+  useEffect(() => {
+    if (userProfile) {
+      const newProfileData = initializeProfileData(userProfile);
+      if (newProfileData) {
+        setProfileData(newProfileData);
+      }
+      
+      // Update notifications
+      setNotifications({
+        email: userProfile.notifications?.email ?? true,
+        push: userProfile.notifications?.push ?? true,
+        workoutReminders: userProfile.notifications?.workoutReminders ?? true,
+        coachMessages: userProfile.notifications?.coachMessages ?? true
+      });
+      
+      // Update privacy
+      setPrivacy({
+        profilePublic: userProfile.privacy?.profilePublic ?? true,
+        statsPublic: userProfile.privacy?.statsPublic ?? true,
+        competitionHistory: userProfile.privacy?.competitionHistory ?? true
+      });
+      
+      // Update theme
+      setTheme(userProfile.theme || 'dark');
+      
+      // Update social connections
+      setSocialConnections({
+        instagram: { 
+          connected: !!userProfile.socialMedia?.instagram, 
+          handle: userProfile.socialMedia?.instagram || '' 
+        },
+        youtube: { 
+          connected: !!userProfile.socialMedia?.youtube, 
+          handle: userProfile.socialMedia?.youtube || '' 
+        },
+        twitter: { 
+          connected: !!userProfile.socialMedia?.twitter, 
+          handle: userProfile.socialMedia?.twitter || '' 
+        },
+        website: { 
+          connected: !!userProfile.socialMedia?.website, 
+          url: userProfile.socialMedia?.website || '' 
+        }
+      });
+    }
+  }, [userProfile]);
 
+  // Social connections
+  const [socialConnections, setSocialConnections] = useState({
+    instagram: { 
+      connected: !!userProfile?.socialMedia?.instagram, 
+      handle: userProfile?.socialMedia?.instagram || '' 
+    },
+    youtube: { 
+      connected: !!userProfile?.socialMedia?.youtube, 
+      handle: userProfile?.socialMedia?.youtube || '' 
+    },
+    twitter: { 
+      connected: !!userProfile?.socialMedia?.twitter, 
+      handle: userProfile?.socialMedia?.twitter || '' 
+    },
+    website: { 
+      connected: !!userProfile?.socialMedia?.website, 
+      url: userProfile?.socialMedia?.website || '' 
+    }
+  });
+
+  // Mock data for stats (will be replaced with real data later)
   const personalStats = {
     currentTotal: '1,247 lbs',
     squat: { current: 425, pr: 435, prDate: 'Dec 2024' },
@@ -56,6 +209,7 @@ export const ProfilePage: React.FC = () => {
     prCount: 23
   };
 
+  // Mock competition history (will be replaced with real data later)
   const competitionHistory = [
     {
       id: 1,
@@ -71,83 +225,134 @@ export const ProfilePage: React.FC = () => {
       deadlift: { attempts: [525, 547, 560], best: 547 },
       wilks: 387.5,
       isPR: true
-    },
-    {
-      id: 2,
-      name: 'Fall Classic 2024',
-      date: 'Sep 15, 2024',
-      federation: 'USPA',
-      location: 'Austin, TX',
-      weightClass: '83kg Open',
-      total: '1,198 lbs',
-      placement: '1st Place',
-      squat: { attempts: [385, 405, 415], best: 405 },
-      bench: { attempts: [245, 265, 275], best: 265 },
-      deadlift: { attempts: [505, 528, 540], best: 528 },
-      wilks: 372.1,
-      isPR: false
-    },
-    {
-      id: 3,
-      name: 'Summer Showdown 2024',
-      date: 'Jun 22, 2024',
-      federation: 'RPS',
-      location: 'Houston, TX',
-      weightClass: '83kg Open',
-      total: '1,156 lbs',
-      placement: '3rd Place',
-      squat: { attempts: [365, 385, 400], best: 385 },
-      bench: { attempts: [235, 255, 265], best: 255 },
-      deadlift: { attempts: [495, 516, 530], best: 516 },
-      wilks: 358.2,
-      isPR: false
     }
   ];
 
+  // Mock achievements (will be replaced with real data later)
   const achievements = [
-    { id: 1, title: '1000 lb Club', description: 'First PowerUper milestone', date: 'Mar 2023', icon: Trophy, color: 'yellow' },
-    { id: 2, title: 'Competition Debut', description: 'First PowerUping meet', date: 'Jun 2023', icon: Award, color: 'blue' },
-    { id: 3, title: 'State Record', description: '83kg Deadlift Record', date: 'Dec 2024', icon: Trophy, color: 'purple' },
-    { id: 4, title: 'Perfect Meet', description: '9/9 successful attempts', date: 'Sep 2024', icon: Award, color: 'green' },
-    { id: 5, title: 'Consistency King', description: '50 consecutive workouts', date: 'Nov 2024', icon: Trophy, color: 'orange' },
-    { id: 6, title: 'PR Machine', description: '20+ personal records', date: 'Jan 2025', icon: Award, color: 'red' }
+    { id: 1, title: '1000 lb Club', description: 'First milestone', date: 'Mar 2023', icon: Trophy, color: 'yellow' },
+    { id: 2, title: 'Competition Debut', description: 'First meet', date: 'Jun 2023', icon: Award, color: 'blue' }
   ];
 
-  const subscriptions = [
-    {
-      id: 1,
-      name: 'Sarah Johnson Coaching',
-      type: 'Personal Coaching',
-      price: '$150/month',
-      nextBilling: 'Feb 15, 2025',
-      status: 'active',
-      features: ['Custom Programming', '24/7 Support', 'Video Analysis', 'Meet Prep']
-    },
-    {
-      id: 2,
-      name: 'Juggernaut Training Systems',
-      type: 'Program Access',
-      price: '$29/month',
-      nextBilling: 'Feb 12, 2025',
-      status: 'active',
-      features: ['All Programs', 'Exercise Library', 'Progress Tracking']
-    },
-    {
-      id: 3,
-      name: 'PowerUp Pro',
-      type: 'App Premium',
-      price: '$9.99/month',
-      nextBilling: 'Feb 20, 2025',
-      status: 'active',
-      features: ['Advanced Analytics', 'Cloud Sync', 'Priority Support']
+  // Mock subscriptions (will be replaced with real data later)
+  const subscriptions: any[] = [];
+
+  // Handle profile update
+  const handleProfileUpdate = async (data: any) => {
+    if (!currentUser) return;
+    
+    setLoading(true);
+    setSaveMessage('');
+    
+    try {
+      // Prepare update data
+      const updateData: any = {
+        displayName: data.name || `${currentUser.displayName || ''}`,
+        username: data.username,
+        bio: data.bio,
+        location: data.location,
+        phone: data.phone,
+        weightClass: data.weightClass,
+        division: data.division,
+        federation: data.federation,
+        coach: data.coach,
+        gym: data.gym,
+        gender: data.gender,
+        emergencyContact: data.emergencyContact,
+        coachPhone: data.coachPhone,
+        coachPowerUpUsername: data.coachPowerUpUsername,
+        teamName: data.teamName,
+        teamPowerUpUsername: data.teamPowerUpUsername,
+        // Also update firstName and lastName if using split name
+        firstName: data.name ? data.name.split(' ')[0] : userProfile?.firstName,
+        lastName: data.name ? data.name.split(' ').slice(1).join(' ') : userProfile?.lastName,
+      };
+      
+      // Handle date of birth
+      if (data.dateOfBirth) {
+        updateData.dateOfBirth = new Date(data.dateOfBirth);
+      }
+      
+      // Handle federation membership
+      if (data.federationMembership) {
+        updateData.federationMembership = {
+          ...data.federationMembership,
+          expirationDate: data.federationMembership.expirationDate ? 
+            new Date(data.federationMembership.expirationDate) : undefined
+        };
+      }
+      
+      await updateUserProfile(currentUser.uid, updateData);
+      
+      // Refresh the profile from AuthContext
+      await refreshProfile();
+      
+      setSaveMessage('Profile updated successfully!');
+      
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setSaveMessage('Error updating profile. Please try again.');
+    } finally {
+      setLoading(false);
+      setTimeout(() => setSaveMessage(''), 3000);
     }
-  ];
+  };
 
-  const socialConnections = {
-    instagram: { connected: true, handle: '@alexlifts', followers: '2.1K' },
-    youtube: { connected: false, handle: '', followers: '0' },
-    twitter: { connected: true, handle: '@alex_PowerUps', followers: '456' },
-    website: { connected: false, url: '' }
+  // Handle notification update
+  const handleNotificationUpdate = async (newNotifications: any) => {
+    if (!currentUser) return;
+    
+    try {
+      await updateUserProfile(currentUser.uid, { notifications: newNotifications });
+      setNotifications(newNotifications);
+    } catch (error) {
+      console.error('Error updating notifications:', error);
+    }
+  };
+
+  // Handle privacy update
+  const handlePrivacyUpdate = async (newPrivacy: any) => {
+    if (!currentUser) return;
+    
+    try {
+      await updateUserProfile(currentUser.uid, { privacy: newPrivacy });
+      setPrivacy(newPrivacy);
+    } catch (error) {
+      console.error('Error updating privacy:', error);
+    }
+  };
+
+  // Handle theme change
+  const handleThemeChange = async (newTheme: string) => {
+    if (!currentUser) return;
+    
+    try {
+      await updateUserProfile(currentUser.uid, { theme: newTheme as 'light' | 'dark' });
+      setTheme(newTheme);
+    } catch (error) {
+      console.error('Error updating theme:', error);
+    }
+  };
+
+  // Handle social connection update
+  const handleSocialUpdate = async (platform: string, handle: string, connected: boolean) => {
+    if (!currentUser) return;
+    
+    try {
+      const updatedSocialMedia = {
+        ...userProfile?.socialMedia,
+        [platform]: connected ? handle : undefined
+      };
+      
+      await updateUserProfile(currentUser.uid, { socialMedia: updatedSocialMedia });
+      
+      setSocialConnections(prev => ({
+        ...prev,
+        [platform]: { connected, handle: connected ? handle : '' }
+      }));
+    } catch (error) {
+      console.error('Error updating social media:', error);
+    }
   };
 
   const tabs = [
@@ -174,16 +379,27 @@ export const ProfilePage: React.FC = () => {
             theme={theme}
             subscriptions={subscriptions}
             socialConnections={socialConnections}
-            onProfileUpdate={setProfileData}
-            onNotificationUpdate={setNotifications}
-            onPrivacyUpdate={setPrivacy}
-            onThemeChange={setTheme}
+            onProfileUpdate={handleProfileUpdate}
+            onNotificationUpdate={handleNotificationUpdate}
+            onPrivacyUpdate={handlePrivacyUpdate}
+            onThemeChange={handleThemeChange}
+            onSocialUpdate={handleSocialUpdate}
+            loading={loading}
+            saveMessage={saveMessage}
           />
         );
       default:
         return <StatsTab personalStats={personalStats} />;
     }
   };
+
+  if (!userProfile) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-white">Loading profile...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -192,6 +408,32 @@ export const ProfilePage: React.FC = () => {
         <User className="w-8 h-8 text-green-500" />
         <h1 className="text-3xl font-bold text-white">Profile</h1>
       </div>
+
+      {/* Missing Fields Alert */}
+      {missingFields.length > 0 && (
+        <div className="bg-yellow-900/30 border border-yellow-700 rounded-xl p-4 mb-6">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="w-5 h-5 text-yellow-500 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-yellow-400 mb-1">Complete Your Profile for Meet Registration</h3>
+              <p className="text-yellow-300 text-sm mb-2">
+                You need to add the following information before you can register for meets:
+              </p>
+              <ul className="text-yellow-200 text-sm space-y-1">
+                {missingFields.map((field, index) => (
+                  <li key={index}>• {field}</li>
+                ))}
+              </ul>
+              <button
+                onClick={() => setActiveTab('settings')}
+                className="mt-3 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded-lg text-white text-sm font-medium transition-colors"
+              >
+                Complete Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Profile Header */}
       <ProfileHeader

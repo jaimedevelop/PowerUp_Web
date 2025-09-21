@@ -28,16 +28,17 @@ export interface MeetRegistration {
   weightClass: string;
   division: string;
   equipment: string;
-  expectedWeight: number; // For flight organization, actual weight determined at weigh-ins
   
-  // Personal Details (collected during registration - required)
+  // Personal Details (from AuthContext - required)
   dateOfBirth: Date;
   gender: 'male' | 'female';
   emergencyContact: EmergencyContact;
   
-  // Optional Competition Info
-  personalRecords?: PersonalRecords;
-  federationMembership?: FederationMembership;
+  // Federation Membership (now required)
+  federationMembership: FederationMembership;
+  
+  // Coach/Team Info
+  hasCoach: boolean;
   coachInfo?: CoachInfo;
   
   // Registration Status
@@ -61,18 +62,6 @@ export interface EmergencyContact {
   email?: string;
 }
 
-export interface PersonalRecords {
-  squat?: number;
-  bench?: number;
-  deadlift?: number;
-  total?: number;
-  // Optional: specific equipment PRs
-  squatRaw?: number;
-  benchRaw?: number;
-  deadliftRaw?: number;
-  totalRaw?: number;
-}
-
 export interface FederationMembership {
   federation: string;
   membershipNumber: string;
@@ -80,10 +69,11 @@ export interface FederationMembership {
 }
 
 export interface CoachInfo {
-  coachName?: string;
-  coachEmail?: string;
-  coachPhone?: string;
+  coachName: string;
+  coachPhone: string;
+  coachPowerUpUsername?: string;
   teamName?: string;
+  teamPowerUpUsername?: string;
 }
 
 export type RegistrationStatus = 
@@ -103,27 +93,38 @@ export type PaymentStatus =
 
 // Registration Form Data (what we collect from the athlete)
 export interface RegistrationFormData {
+  // Federation membership (required first)
+  federationMembership: {
+    federation: string;
+    membershipNumber: string;
+    expirationDate: string; // Will be converted to Date
+  };
+  
   // Competition choices
   weightClass: string;
   division: string;
   equipment: string;
-  expectedWeight: number;
   
-  // Personal information (required for first-time registration)
-  dateOfBirth: string; // Will be converted to Date
-  gender: 'male' | 'female';
+  // Coach/Team information
+  hasCoach: boolean;
+  coachInfo?: {
+    coachName: string;
+    coachPhone: string;
+    coachPowerUpUsername?: string;
+    teamName?: string;
+    teamPowerUpUsername?: string;
+  };
   
-  // Emergency contact (required)
+  // Emergency contact (from user profile or updated)
   emergencyContact: EmergencyContact;
-  
-  // Optional information
-  personalRecords?: Partial<PersonalRecords>;
-  federationMembership?: Partial<FederationMembership>;
-  coachInfo?: Partial<CoachInfo>;
   
   // Agreement/waivers
   agreedToWaiver: boolean;
   agreedToRules: boolean;
+  
+  // Personal data (added from AuthContext during submission)
+  dateOfBirth?: string;
+  gender?: 'male' | 'female';
 }
 
 // Registration Statistics
@@ -138,6 +139,38 @@ export interface RegistrationStats {
   averageWeight: number;
   divisionBreakdown: Record<string, number>;
   weightClassBreakdown: Record<string, number>;
+  federationBreakdown: Record<string, number>;
+  coachCount: number;
+}
+
+// Helper function to clean undefined values from objects
+function cleanUndefinedValues(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+  
+  if (obj instanceof Date || obj instanceof Timestamp) {
+    return obj;
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(cleanUndefinedValues);
+  }
+  
+  if (typeof obj === 'object') {
+    const cleaned: any = {};
+    for (const key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const value = obj[key];
+        if (value !== undefined) {
+          cleaned[key] = cleanUndefinedValues(value);
+        }
+      }
+    }
+    return cleaned;
+  }
+  
+  return obj;
 }
 
 // Registration Service Class
@@ -161,9 +194,42 @@ export class RegistrationService {
         throw new Error('You are already registered for this meet');
       }
       
+      // Validate required fields
+      this.validateRegistrationData(formData);
+      
       // Generate registration ID
       const registrationId = `${meetId}_${userId}`;
       const now = new Date();
+      
+      // Parse dates safely with validation
+      let dateOfBirth: Date;
+      if (formData.dateOfBirth) {
+        dateOfBirth = new Date(formData.dateOfBirth);
+        // Check if date is valid
+        if (isNaN(dateOfBirth.getTime())) {
+          throw new Error('Invalid date of birth provided');
+        }
+      } else {
+        throw new Error('Date of birth is required');
+      }
+      
+      // Parse federation expiration date
+      let federationExpirationDate: Date;
+      if (formData.federationMembership.expirationDate) {
+        federationExpirationDate = new Date(formData.federationMembership.expirationDate);
+        // Check if date is valid
+        if (isNaN(federationExpirationDate.getTime())) {
+          throw new Error('Invalid federation membership expiration date');
+        }
+      } else {
+        throw new Error('Federation membership expiration date is required');
+      }
+      
+      // Validate gender
+      const gender = formData.gender;
+      if (!gender || (gender !== 'male' && gender !== 'female')) {
+        throw new Error('Valid gender selection is required');
+      }
       
       // Create registration document
       const registration: MeetRegistration = {
@@ -173,37 +239,77 @@ export class RegistrationService {
         weightClass: formData.weightClass,
         division: formData.division,
         equipment: formData.equipment,
-        expectedWeight: formData.expectedWeight,
-        dateOfBirth: new Date(formData.dateOfBirth),
-        gender: formData.gender,
+        dateOfBirth: dateOfBirth,
+        gender: gender,
         emergencyContact: formData.emergencyContact,
-        personalRecords: formData.personalRecords,
-        federationMembership: formData.federationMembership ? {
-          ...formData.federationMembership,
-          expirationDate: new Date(formData.federationMembership.expirationDate!)
-        } : undefined,
-        coachInfo: formData.coachInfo,
+        federationMembership: {
+          federation: formData.federationMembership.federation,
+          membershipNumber: formData.federationMembership.membershipNumber,
+          expirationDate: federationExpirationDate
+        },
+        hasCoach: formData.hasCoach,
         registrationStatus: 'pending',
         paymentStatus: 'unpaid',
         registeredAt: now,
         updatedAt: now,
       };
       
+      // Only add coachInfo if hasCoach is true and coachInfo exists
+      if (formData.hasCoach && formData.coachInfo) {
+        registration.coachInfo = {
+          coachName: formData.coachInfo.coachName,
+          coachPhone: formData.coachInfo.coachPhone,
+        };
+        
+        // Only add optional coach fields if they have values
+        if (formData.coachInfo.coachPowerUpUsername) {
+          registration.coachInfo.coachPowerUpUsername = formData.coachInfo.coachPowerUpUsername;
+        }
+        if (formData.coachInfo.teamName) {
+          registration.coachInfo.teamName = formData.coachInfo.teamName;
+        }
+        if (formData.coachInfo.teamPowerUpUsername) {
+          registration.coachInfo.teamPowerUpUsername = formData.coachInfo.teamPowerUpUsername;
+        }
+      }
+      
+      // Prepare Firestore document (convert dates to Timestamps)
+      const firestoreData: any = {
+        id: registration.id,
+        meetId: registration.meetId,
+        userId: registration.userId,
+        weightClass: registration.weightClass,
+        division: registration.division,
+        equipment: registration.equipment,
+        dateOfBirth: Timestamp.fromDate(registration.dateOfBirth),
+        gender: registration.gender,
+        emergencyContact: registration.emergencyContact,
+        federationMembership: {
+          federation: registration.federationMembership.federation,
+          membershipNumber: registration.federationMembership.membershipNumber,
+          expirationDate: Timestamp.fromDate(registration.federationMembership.expirationDate)
+        },
+        hasCoach: registration.hasCoach,
+        registrationStatus: registration.registrationStatus,
+        paymentStatus: registration.paymentStatus,
+        registeredAt: Timestamp.fromDate(registration.registeredAt),
+        updatedAt: Timestamp.fromDate(registration.updatedAt),
+      };
+      
+      // Only add coachInfo to Firestore if it exists
+      if (registration.coachInfo) {
+        firestoreData.coachInfo = registration.coachInfo;
+      }
+      
+      // Clean any remaining undefined values
+      const cleanedData = cleanUndefinedValues(firestoreData);
+      
       // Use batch write to update both registration and meet stats
       const batch = writeBatch(db);
       
       // Add registration to subcollection
       const registrationRef = doc(db, 'meets', meetId, 'registrations', registrationId);
-      batch.set(registrationRef, {
-        ...registration,
-        dateOfBirth: Timestamp.fromDate(registration.dateOfBirth),
-        registeredAt: Timestamp.fromDate(registration.registeredAt),
-        updatedAt: Timestamp.fromDate(registration.updatedAt),
-        federationMembership: registration.federationMembership ? {
-          ...registration.federationMembership,
-          expirationDate: Timestamp.fromDate(registration.federationMembership.expirationDate)
-        } : undefined,
-      });
+      batch.set(registrationRef, cleanedData);
       
       // Update meet statistics
       const meetRef = doc(db, 'meets', meetId);
@@ -256,7 +362,7 @@ export class RegistrationService {
     options: {
       status?: RegistrationStatus;
       limit?: number;
-      orderBy?: 'registeredAt' | 'expectedWeight' | 'weightClass';
+      orderBy?: 'registeredAt' | 'weightClass' | 'division';
     } = {}
   ): Promise<MeetRegistration[]> {
     try {
@@ -315,7 +421,7 @@ export class RegistrationService {
         updateData.notes = notes;
       }
       
-      await updateDoc(registrationRef, updateData);
+      await updateDoc(registrationRef, cleanUndefinedValues(updateData));
       
       // If approving from pending, update meet revenue projection
       if (status === 'approved') {
@@ -345,7 +451,7 @@ export class RegistrationService {
         updatedAt: Timestamp.fromDate(new Date()),
       };
       
-      await updateDoc(registrationRef, updateData);
+      await updateDoc(registrationRef, cleanUndefinedValues(updateData));
       
       // Update meet revenue
       await this.updateMeetRevenue(meetId);
@@ -379,7 +485,7 @@ export class RegistrationService {
         updateData.notes = notes;
       }
       
-      await updateDoc(registrationRef, updateData);
+      await updateDoc(registrationRef, cleanUndefinedValues(updateData));
       
     } catch (error) {
       console.error('Error recording weigh-in:', error);
@@ -408,7 +514,7 @@ export class RegistrationService {
         updateData.notes = `Withdrawn: ${reason}`;
       }
       
-      await updateDoc(registrationRef, updateData);
+      await updateDoc(registrationRef, cleanUndefinedValues(updateData));
       
       // Update meet statistics
       const batch = writeBatch(db);
@@ -441,9 +547,11 @@ export class RegistrationService {
         paidRegistrations: registrations.filter(r => r.paymentStatus === 'paid').length,
         totalRevenue: 0, // Will be calculated based on meet fee
         pendingRevenue: 0,
-        averageWeight: 0,
+        averageWeight: 0, // No longer applicable since we don't collect expected weight
         divisionBreakdown: {},
         weightClassBreakdown: {},
+        federationBreakdown: {},
+        coachCount: registrations.filter(r => r.hasCoach).length,
       };
       
       // Calculate division and weight class breakdowns
@@ -455,11 +563,11 @@ export class RegistrationService {
         // Weight class breakdown
         stats.weightClassBreakdown[registration.weightClass] = 
           (stats.weightClassBreakdown[registration.weightClass] || 0) + 1;
+        
+        // Federation breakdown
+        stats.federationBreakdown[registration.federationMembership.federation] = 
+          (stats.federationBreakdown[registration.federationMembership.federation] || 0) + 1;
       });
-      
-      // Calculate average expected weight
-      const totalWeight = registrations.reduce((sum, r) => sum + r.expectedWeight, 0);
-      stats.averageWeight = registrations.length > 0 ? totalWeight / registrations.length : 0;
       
       return stats;
       
@@ -492,6 +600,48 @@ export class RegistrationService {
   }
   
   // Private helper methods
+  
+  private static validateRegistrationData(formData: RegistrationFormData): void {
+    // Validate required fields
+    if (!formData.federationMembership.federation) {
+      throw new Error('Federation is required');
+    }
+    if (!formData.federationMembership.membershipNumber) {
+      throw new Error('Federation membership number is required');
+    }
+    if (!formData.federationMembership.expirationDate) {
+      throw new Error('Federation membership expiration date is required');
+    }
+    
+    // Check if federation membership is expired
+    const expirationDate = new Date(formData.federationMembership.expirationDate);
+    const today = new Date();
+    if (expirationDate <= today) {
+      throw new Error('Federation membership is expired');
+    }
+    
+    // Validate competition details
+    if (!formData.weightClass || !formData.division || !formData.equipment) {
+      throw new Error('Competition details (weight class, division, equipment) are required');
+    }
+    
+    // Validate emergency contact
+    if (!formData.emergencyContact.name || !formData.emergencyContact.phone || !formData.emergencyContact.relationship) {
+      throw new Error('Complete emergency contact information is required');
+    }
+    
+    // Validate coach info if hasCoach is true
+    if (formData.hasCoach) {
+      if (!formData.coachInfo?.coachName || !formData.coachInfo?.coachPhone) {
+        throw new Error('Coach name and phone are required when coach is selected');
+      }
+    }
+    
+    // Validate agreements
+    if (!formData.agreedToWaiver || !formData.agreedToRules) {
+      throw new Error('You must agree to the waiver and rules');
+    }
+  }
   
   private static async validateMeetRegistration(meetId: string): Promise<void> {
     const meetRef = doc(db, 'meets', meetId);
@@ -529,10 +679,10 @@ export class RegistrationService {
       dateOfBirth: data.dateOfBirth?.toDate() || new Date(),
       registeredAt: data.registeredAt?.toDate() || new Date(),
       updatedAt: data.updatedAt?.toDate() || new Date(),
-      federationMembership: data.federationMembership ? {
+      federationMembership: {
         ...data.federationMembership,
         expirationDate: data.federationMembership.expirationDate?.toDate() || new Date(),
-      } : undefined,
+      },
     };
   }
   
@@ -547,10 +697,7 @@ export class RegistrationService {
       const registrationFee = meetData.registrationFee || 0;
       
       // Get paid registrations count
-      const paidRegistrations = await this.getMeetRegistrations(meetId, {
-        // Note: This would need to be implemented with proper querying
-      });
-      
+      const paidRegistrations = await this.getMeetRegistrations(meetId);
       const paidCount = paidRegistrations.filter(r => r.paymentStatus === 'paid').length;
       const revenue = paidCount * registrationFee;
       

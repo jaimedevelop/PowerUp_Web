@@ -55,14 +55,14 @@ const AdminSidebar: React.FC = () => {
           </NavLink>
         ))}
         
-        {/* Exit Admin Button */}
+        {/* Sign Out Button */}
         <div className="pt-4 border-t border-slate-700">
           <NavLink
             to="/"
             className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group text-slate-300 hover:bg-slate-800 hover:text-white"
           >
             <ArrowLeft className="w-5 h-5 flex-shrink-0" />
-            <span className="font-medium md:hidden lg:block">Exit Admin</span>
+            <span className="font-medium md:hidden lg:block">Sign Out</span>
           </NavLink>
         </div>
       </nav>

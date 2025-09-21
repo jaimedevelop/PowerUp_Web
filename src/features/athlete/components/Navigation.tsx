@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Trophy, Dumbbell, Users, User, Settings } from 'lucide-react';
+import { Home, Trophy, Dumbbell, Users, User, LogOut } from 'lucide-react';
 
 export type TabType = 'feed' | 'compete' | 'train' | 'connect' | 'profile';
 
@@ -19,9 +19,6 @@ const navItems = [
 
 // Sidebar for desktop and tablet
 const Sidebar: React.FC = () => {
-  const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith('/admin');
-
   return (
     <aside className="fixed left-0 top-0 h-full w-64 bg-slate-900 border-r border-slate-700 z-40 lg:w-64 md:w-16 hidden md:block">
       {/* Logo Area */}
@@ -53,22 +50,14 @@ const Sidebar: React.FC = () => {
           </NavLink>
         ))}
         
-        {/* Admin Toggle Button */}
+        {/* Sign Out Button */}
         <div className="pt-4 border-t border-slate-700">
           <NavLink
-            to={isAdminRoute ? "/" : "/admin/director/dashboard"}
-            className={({ isActive }) =>
-              `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
-                isAdminRoute
-                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-              }`
-            }
+            to="/"
+            className="flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group text-slate-300 hover:bg-slate-800 hover:text-white"
           >
-            <Settings className="w-5 h-5 flex-shrink-0" />
-            <span className="font-medium md:hidden lg:block">
-              {isAdminRoute ? 'Exit Admin' : 'Admin Panel'}
-            </span>
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            <span className="font-medium md:hidden lg:block">Sign Out</span>
           </NavLink>
         </div>
       </nav>
@@ -78,9 +67,6 @@ const Sidebar: React.FC = () => {
         <div className="text-xs text-slate-400 md:hidden lg:block">
           <p>© 2025 PowerUp</p>
           <p>Version 1.0.0</p>
-          {isAdminRoute && (
-            <p className="text-orange-400 mt-1">Admin Mode</p>
-          )}
         </div>
       </div>
     </aside>
