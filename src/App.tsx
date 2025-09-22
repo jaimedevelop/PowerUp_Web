@@ -26,7 +26,7 @@ import EmailVerificationSuccess from './features/shared/auth/emails/EmailVerific
 import EmailVerificationError from './features/shared/auth/emails/EmailVerificationError';
 
 import { AuthProvider } from './contexts/shared/AuthContext';
-//test thing
+
 function App() {
   return (
     <AuthProvider>
