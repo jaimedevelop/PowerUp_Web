@@ -20,11 +20,6 @@ import MeetDetailsPage from './features/athlete/components/compete/MeetDetailsPa
 import LandingPage from './features/athlete/pages/LandingPage';
 import LoginPage from './features/shared/auth/LoginPage';
 import CreateAccountPage from './features/shared/auth/CreateAccountPage';
-//This is a comment to test a GIT PUSH
-//SAVE THE FILE
-//Remember that white dot next to the file name, when its saved, it goes away, watch. saved.
-// Email Verification Components
-//always stage changes, and always add a text message for the change
 import EmailVerificationPending from './features/shared/auth/emails/EmailVerificationPending';
 import EmailVerification from './features/shared/auth/emails/EmailVerification';
 import EmailVerificationSuccess from './features/shared/auth/emails/EmailVerificationSuccess';
