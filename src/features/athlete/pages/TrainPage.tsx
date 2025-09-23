@@ -8,10 +8,12 @@ import {
 } from "lucide-react";
 import * as Tabs from "@radix-ui/react-tabs";
 
-import { TrainingCalendar } from "../components/train/TrainingCalendar";
+import { TrainingCalendar } from "../components/train/TrainingCalendar/TrainingCalendar";
 import { WorkoutLogger } from "../components/train/WorkoutLogger";
 import { CoachMessages } from "../components/train/CoachMessages";
 import { TrainingStats } from "../components/train/TrainingStats";
+import { WorkoutDay } from "../components/train/TrainingCalendar/WorkoutDay";
+
 // ❌ remove ProgramTemplates import
 // import { ProgramTemplates } from "../components/train/ProgramTemplates";
 import LoadTheBar from "../components/train/LoadTheBar"; // ✅ new
