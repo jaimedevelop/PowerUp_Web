@@ -329,6 +329,7 @@ export const TrainingCalendar: React.FC = () => {
                   }}
                 />
               )}
+              {/*jello*/}
 
               {/* coach notes */}
               {openEvent.ev.coachNotes && (
