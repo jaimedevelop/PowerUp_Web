@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Calendar, DollarSign, Users } from 'lucide-react';
 import { LoadingSpinner } from '../../../admin/components/shared/LoadingSpinner';
+import { tw, getButtonClass } from '../../../../styles/theme';
 import { 
   searchMeetsWithFilters, 
   getPublishedMeets,
@@ -26,7 +27,6 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Load initial meets on component mount
   useEffect(() => {
     loadInitialMeets();
   }, []);
@@ -103,24 +103,24 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
   };
 
   return (
-    <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+    <div className={`${tw.glassCard} p-6`}>
       <div className="flex items-center mb-6">
-        <Search className="w-6 h-6 text-purple-400 mr-3" />
+        <Search className="w-6 h-6 text-blue-400 mr-3" />
         <h3 className="text-xl font-semibold text-white">Find Competitions</h3>
       </div>
 
       {/* Search Filters */}
       <div className="space-y-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">Location</label>
+          <label className={`block text-sm font-medium ${tw.textSecondary} mb-2`}>Location</label>
           <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <MapPin className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 ${tw.textTertiary}`} />
             <input 
               type="text"
               value={searchLocation}
               onChange={(e) => setSearchLocation(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              className="w-full pl-10 pr-4 py-3 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-slate-400"
+              className={`w-full pl-10 ${tw.input}`}
               placeholder="City, State or ZIP code"
               disabled={isLoading}
             />
@@ -129,11 +129,11 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Federation</label>
+            <label className={`block text-sm font-medium ${tw.textSecondary} mb-2`}>Federation</label>
             <select 
               value={selectedFederation}
               onChange={(e) => setSelectedFederation(e.target.value)}
-              className="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white"
+              className={tw.input}
               disabled={isLoading}
             >
               <option value="all">All Federations</option>
@@ -145,11 +145,11 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Date Range</label>
+            <label className={`block text-sm font-medium ${tw.textSecondary} mb-2`}>Date Range</label>
             <select 
               value={dateRange}
               onChange={(e) => setDateRange(e.target.value)}
-              className="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white"
+              className={tw.input}
               disabled={isLoading}
             >
               <option value="30days">Next 30 days</option>
@@ -164,7 +164,7 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
           <button 
             onClick={handleSearch}
             disabled={isLoading}
-            className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`flex-1 ${getButtonClass('blue')} flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             {isLoading ? (
               <LoadingSpinner size="sm" className="mr-2" />
@@ -178,7 +178,7 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
             <button 
               onClick={handleClearFilters}
               disabled={isLoading}
-              className="px-4 py-3 bg-slate-600 text-white rounded-lg font-medium hover:bg-slate-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`px-4 py-3 ${tw.glassCard} ${tw.glassCardHover} rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               Clear
             </button>
@@ -193,7 +193,7 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
           {availableMeets.length > 0 && !isInitialLoading && !isLoading && (
             <button
               onClick={handleRetry}
-              className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors"
+              className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
             >
               Refresh
             </button>
@@ -204,22 +204,22 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
         {(isInitialLoading || isLoading) && (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-slate-700 rounded-lg p-4 border border-slate-600">
+              <div key={i} className={`${tw.glassCard} p-4`}>
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <div className="h-6 bg-slate-600 rounded w-48 mb-2"></div>
-                    <div className="h-4 bg-slate-600 rounded w-32"></div>
+                    <div className="h-6 bg-white/10 rounded w-48 mb-2"></div>
+                    <div className="h-4 bg-white/10 rounded w-32"></div>
                   </div>
                   <div className="text-right">
-                    <div className="h-4 bg-slate-600 rounded w-24 mb-1"></div>
-                    <div className="h-3 bg-slate-600 rounded w-16"></div>
+                    <div className="h-4 bg-white/10 rounded w-24 mb-1"></div>
+                    <div className="h-3 bg-white/10 rounded w-16"></div>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 mb-3">
-                  <div className="h-4 bg-slate-600 rounded"></div>
-                  <div className="h-4 bg-slate-600 rounded"></div>
+                  <div className="h-4 bg-white/10 rounded"></div>
+                  <div className="h-4 bg-white/10 rounded"></div>
                 </div>
-                <div className="h-8 bg-slate-600 rounded"></div>
+                <div className="h-8 bg-white/10 rounded"></div>
               </div>
             ))}
           </div>
@@ -227,11 +227,11 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
 
         {/* Error State */}
         {error && (
-          <div className="bg-slate-700 rounded-lg p-6 border border-red-700 text-center">
+          <div className={`${tw.glassCard} p-6 border border-red-500/30 text-center`}>
             <p className="text-red-400 mb-4">{error}</p>
             <button
               onClick={handleRetry}
-              className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+              className={getButtonClass('red')}
             >
               Try Again
             </button>
@@ -240,12 +240,12 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
 
         {/* Empty State */}
         {!isInitialLoading && !isLoading && !error && availableMeets.length === 0 && (
-          <div className="bg-slate-700 rounded-lg p-8 border border-slate-600 text-center">
-            <Search className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-            <p className="text-slate-300 font-medium mb-2">
+          <div className={`${tw.glassCard} p-8 text-center`}>
+            <Search className={`w-12 h-12 ${tw.textTertiary} mx-auto mb-4`} />
+            <p className={`${tw.textSecondary} font-medium mb-2`}>
               {hasSearched ? 'No competitions found' : 'No competitions available'}
             </p>
-            <p className="text-slate-400 text-sm mb-4">
+            <p className={`${tw.textTertiary} text-sm mb-4`}>
               {hasSearched 
                 ? 'Try adjusting your search criteria or check back later.'
                 : 'Check back soon for upcoming competitions in your area.'
@@ -254,7 +254,7 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
             {hasSearched && (
               <button
                 onClick={handleClearFilters}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
+                className={getButtonClass('blue')}
               >
                 Clear Filters
               </button>
@@ -266,36 +266,36 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
         {!isInitialLoading && !isLoading && !error && availableMeets.length > 0 && (
           <>
             {availableMeets.map((comp) => (
-              <div key={comp.id} className="bg-slate-700 rounded-lg p-4 border border-slate-600 hover:border-slate-500 transition-colors">
+              <div key={comp.id} className={`${tw.glassCard} ${tw.glassCardHover} p-4`}>
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <h5 className="font-semibold text-white">{comp.name}</h5>
-                    <p className="text-sm text-slate-400">{comp.federation} • {comp.date}</p>
+                    <p className={`text-sm ${tw.textTertiary}`}>{comp.federation} • {comp.date}</p>
                   </div>
                   <div className="text-right">
                     <p className={`text-sm font-medium ${comp.statusColor}`}>{comp.status}</p>
-                    <p className="text-xs text-slate-400">{comp.spotsLeft} spots left</p>
+                    <p className={`text-xs ${tw.textTertiary}`}>{comp.spotsLeft} spots left</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm mb-3">
-                  <div className="flex items-center text-slate-300">
-                    <MapPin className="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" />
+                  <div className={`flex items-center ${tw.textSecondary}`}>
+                    <MapPin className={`w-4 h-4 ${tw.textTertiary} mr-2 flex-shrink-0`} />
                     <span className="truncate">{comp.location.venue}, {comp.location.city} {comp.location.state}</span>
                   </div>
-                  <div className="flex items-center text-slate-300">
-                    <DollarSign className="w-4 h-4 text-slate-400 mr-2 flex-shrink-0" />
+                  <div className={`flex items-center ${tw.textSecondary}`}>
+                    <DollarSign className={`w-4 h-4 ${tw.textTertiary} mr-2 flex-shrink-0`} />
                     <span>{comp.entryFee}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center text-xs text-slate-400">
+                  <div className={`flex items-center text-xs ${tw.textTertiary}`}>
                     <Users className="w-4 h-4 mr-1" />
                     <span>{comp.registrations}/{comp.maxParticipants} registered</span>
                   </div>
                   <div className="flex-1 mx-4">
-                    <div className="w-full bg-slate-600 rounded-full h-1.5">
+                    <div className="w-full bg-white/10 rounded-full h-1.5">
                       <div 
-                        className="bg-purple-500 h-1.5 rounded-full transition-all duration-300"
+                        className="bg-blue-500 h-1.5 rounded-full transition-all duration-300"
                         style={{ 
                           width: `${Math.min((comp.registrations / comp.maxParticipants) * 100, 100)}%` 
                         }}
@@ -305,7 +305,7 @@ export const CompetitionFinder: React.FC<CompetitionFinderProps> = ({
                 </div>
                 <button 
                   onClick={() => navigate(`/compete/meet/${comp.id}`)}
-                  className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                  className={getButtonClass('green')}
                 >
                   View Details & Register
                 </button>

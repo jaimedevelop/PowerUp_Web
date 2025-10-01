@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CompetitionFinder } from './CompetitionFinder';
 import { LoadingSpinner } from '../../../admin/components/shared/LoadingSpinner';
 import { Star, TrendingUp, MapPin } from 'lucide-react';
+import { tw, getButtonClass } from '../../../../styles/theme';
 import { 
   getFeaturedMeets, 
   getMeetsCountByCategory,
@@ -62,24 +63,26 @@ export const DiscoverTab: React.FC = () => {
       name: 'Local Tampa Meets', 
       count: categoryCounts.local, 
       icon: MapPin,
+      color: 'yellow',
       filter: { location: 'Tampa' }
     },
     { 
       name: 'USAPL Sanctioned', 
       count: categoryCounts.usapl, 
       icon: Star,
+      color: 'blue',
       filter: { federation: 'USAPL' }
     },
     { 
       name: 'Beginner Friendly', 
       count: categoryCounts.beginner, 
       icon: TrendingUp,
+      color: 'green',
       filter: { beginnerFriendly: true }
     }
   ];
 
   const handleCategoryClick = (category: any) => {
-    // You could implement this to filter the CompetitionFinder
     console.log('Category clicked:', category);
   };
 
@@ -91,6 +94,24 @@ export const DiscoverTab: React.FC = () => {
     loadCategoryCount();
   };
 
+  const getIconColor = (color: string) => {
+    switch(color) {
+      case 'yellow': return 'text-yellow-400 group-hover:text-yellow-300';
+      case 'blue': return 'text-blue-400 group-hover:text-blue-300';
+      case 'green': return 'text-green-400 group-hover:text-green-300';
+      default: return 'text-blue-400 group-hover:text-blue-300';
+    }
+  };
+
+  const getCountColor = (color: string) => {
+    switch(color) {
+      case 'yellow': return 'text-yellow-400';
+      case 'blue': return 'text-blue-400';
+      case 'green': return 'text-green-400';
+      default: return 'text-blue-400';
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Featured Competitions */}
@@ -100,29 +121,29 @@ export const DiscoverTab: React.FC = () => {
         {isLoadingFeatured ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {[1, 2].map((i) => (
-              <div key={i} className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-                <div className="h-32 bg-slate-700 flex items-center justify-center">
+              <div key={i} className={`${tw.glassCard} overflow-hidden`}>
+                <div className="h-32 bg-white/5 flex items-center justify-center">
                   <LoadingSpinner size="md" />
                 </div>
                 <div className="p-6">
-                  <div className="h-6 bg-slate-700 rounded mb-2"></div>
-                  <div className="h-4 bg-slate-700 rounded mb-3 w-2/3"></div>
+                  <div className="h-6 bg-white/10 rounded mb-2"></div>
+                  <div className="h-4 bg-white/10 rounded mb-3 w-2/3"></div>
                   <div className="flex justify-between mb-4">
-                    <div className="h-4 bg-slate-700 rounded w-24"></div>
-                    <div className="h-4 bg-slate-700 rounded w-20"></div>
+                    <div className="h-4 bg-white/10 rounded w-24"></div>
+                    <div className="h-4 bg-white/10 rounded w-20"></div>
                   </div>
-                  <div className="h-8 bg-slate-700 rounded"></div>
+                  <div className="h-8 bg-white/10 rounded"></div>
                 </div>
               </div>
             ))}
           </div>
         ) : featuredError ? (
-          <div className="bg-slate-800 rounded-xl border border-red-700 p-6 mb-8">
+          <div className={`${tw.glassCard} border border-red-500/30 p-6 mb-8`}>
             <div className="text-center">
               <p className="text-red-400 mb-4">{featuredError}</p>
               <button
                 onClick={handleRetryFeatured}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+                className={getButtonClass('red')}
               >
                 Try Again
               </button>
@@ -131,29 +152,29 @@ export const DiscoverTab: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {featuredCompetitions.map((comp) => (
-              <div key={comp.id} className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden group hover:border-slate-600 transition-colors">
+              <div key={comp.id} className={`${tw.glassCard} ${tw.glassCardHover} overflow-hidden group`}>
                 <div className={`h-32 ${comp.image} relative`}>
                   <div className="absolute top-4 left-4">
-                    <span className="bg-black/50 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    <span className="bg-black/50 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium">
                       {comp.status}
                     </span>
                   </div>
                   <div className="absolute top-4 right-4">
-                    <span className="bg-black/50 text-white px-2 py-1 rounded text-xs">
+                    <span className="bg-black/50 backdrop-blur-sm text-white px-2 py-1 rounded text-xs">
                       {comp.federation}
                     </span>
                   </div>
                 </div>
                 <div className="p-6">
                   <h4 className="font-semibold text-white mb-2">{comp.name}</h4>
-                  <p className="text-sm text-slate-400 mb-3">{comp.description}</p>
-                  <div className="flex items-center justify-between text-sm text-slate-300 mb-4">
+                  <p className={`text-sm ${tw.textTertiary} mb-3`}>{comp.description}</p>
+                  <div className={`flex items-center justify-between text-sm ${tw.textSecondary} mb-4`}>
                     <span>{comp.date}</span>
                     <span>{comp.location}</span>
                   </div>
                   <button 
                     onClick={() => navigate(`/compete/meet/${comp.id}`)}
-                    className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                    className={getButtonClass('blue')}
                   >
                     View Details
                   </button>
@@ -162,8 +183,8 @@ export const DiscoverTab: React.FC = () => {
             ))}
             
             {featuredCompetitions.length === 0 && (
-              <div className="col-span-2 bg-slate-800 rounded-xl border border-slate-700 p-8 text-center">
-                <p className="text-slate-400">No featured competitions available at this time.</p>
+              <div className={`col-span-2 ${tw.glassCard} p-8 text-center`}>
+                <p className={tw.textTertiary}>No featured competitions available at this time.</p>
               </div>
             )}
           </div>
@@ -177,23 +198,23 @@ export const DiscoverTab: React.FC = () => {
         {isLoadingCategories ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+              <div key={i} className={`${tw.glassCard} p-6`}>
                 <div className="flex items-center mb-3">
-                  <div className="w-5 h-5 bg-slate-700 rounded mr-3"></div>
-                  <div className="h-5 bg-slate-700 rounded flex-1"></div>
+                  <div className="w-5 h-5 bg-white/10 rounded mr-3"></div>
+                  <div className="h-5 bg-white/10 rounded flex-1"></div>
                 </div>
-                <div className="h-8 bg-slate-700 rounded mb-1 w-16"></div>
-                <div className="h-4 bg-slate-700 rounded w-32"></div>
+                <div className="h-8 bg-white/10 rounded mb-1 w-16"></div>
+                <div className="h-4 bg-white/10 rounded w-32"></div>
               </div>
             ))}
           </div>
         ) : categoryError ? (
-          <div className="bg-slate-800 rounded-xl border border-red-700 p-6 mb-8">
+          <div className={`${tw.glassCard} border border-red-500/30 p-6 mb-8`}>
             <div className="text-center">
               <p className="text-red-400 mb-4">{categoryError}</p>
               <button
                 onClick={handleRetryCategories}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+                className={getButtonClass('red')}
               >
                 Try Again
               </button>
@@ -207,14 +228,14 @@ export const DiscoverTab: React.FC = () => {
                 <button
                   key={index}
                   onClick={() => handleCategoryClick(category)}
-                  className="bg-slate-800 rounded-xl p-6 border border-slate-700 text-left hover:border-slate-600 hover:bg-slate-700/50 transition-all duration-200 group"
+                  className={`${tw.glassCard} ${tw.glassCardHover} p-6 text-left group`}
                 >
                   <div className="flex items-center mb-3">
-                    <IconComponent className="w-5 h-5 text-purple-400 mr-3 group-hover:text-purple-300" />
+                    <IconComponent className={`w-5 h-5 ${getIconColor(category.color)} mr-3`} />
                     <span className="font-medium text-white">{category.name}</span>
                   </div>
-                  <p className="text-2xl font-bold text-purple-400 mb-1">{category.count}</p>
-                  <p className="text-sm text-slate-400">competitions available</p>
+                  <p className={`text-2xl font-bold ${getCountColor(category.color)} mb-1`}>{category.count}</p>
+                  <p className={`text-sm ${tw.textTertiary}`}>competitions available</p>
                 </button>
               );
             })}

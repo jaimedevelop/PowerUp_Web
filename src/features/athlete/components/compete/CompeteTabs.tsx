@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Calendar, Trophy, Zap } from 'lucide-react';
+import { tw } from '../../../../styles/theme';
 
 type CompeteTabType = 'discover' | 'register' | 'my-competitions' | 'competition-mode';
 
@@ -19,31 +20,45 @@ export const CompeteTabs: React.FC<CompeteTabsProps> = ({
       id: 'discover' as CompeteTabType,
       label: 'Discover',
       icon: Search,
-      description: 'Find competitions'
+      description: 'Find competitions',
+      color: 'blue'
     },
     {
       id: 'register' as CompeteTabType,
       label: 'Register',
       icon: Calendar,
-      description: 'Sign up for meets'
+      description: 'Sign up for meets',
+      color: 'green'
     },
     {
       id: 'my-competitions' as CompeteTabType,
       label: 'My Competitions',
       icon: Trophy,
-      description: 'Track your meets'
+      description: 'Track your meets',
+      color: 'yellow'
     },
     {
       id: 'competition-mode' as CompeteTabType,
       label: 'Competition Mode',
       icon: Zap,
       description: 'Live meet tracking',
+      color: 'red',
       isSpecial: true
     }
   ];
 
+  const getActiveColor = (color: string) => {
+    switch(color) {
+      case 'blue': return 'border-blue-500 text-blue-400';
+      case 'green': return 'border-green-500 text-green-400';
+      case 'yellow': return 'border-yellow-500 text-yellow-400';
+      case 'red': return 'border-red-500 text-red-400';
+      default: return 'border-blue-500 text-blue-400';
+    }
+  };
+
   return (
-    <div className="bg-slate-800 rounded-xl border border-slate-700 mb-8">
+    <div className={`${tw.glassCard} mb-8`}>
       <div className="flex">
         {tabs.map((tab) => {
           const IconComponent = tab.icon;
@@ -55,12 +70,10 @@ export const CompeteTabs: React.FC<CompeteTabsProps> = ({
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={`
-                flex-1 px-6 py-4 text-left border-r border-slate-700 last:border-r-0 transition-all duration-200
+                ${tw.tabButton}
                 ${isActive 
-                  ? isCompetitionMode 
-                    ? 'bg-gradient-to-r from-red-600/20 to-orange-600/20 border-b-2 border-red-500' 
-                    : 'bg-slate-700 border-b-2 border-purple-500'
-                  : 'hover:bg-slate-700/50'
+                  ? `${tw.tabButtonActive} ${getActiveColor(tab.color)}` 
+                  : tw.tabButtonInactive
                 }
               `}
             >
@@ -68,16 +81,14 @@ export const CompeteTabs: React.FC<CompeteTabsProps> = ({
                 <IconComponent 
                   className={`w-5 h-5 mr-3 ${
                     isActive 
-                      ? isCompetitionMode 
-                        ? competitionModeActive 
-                          ? 'text-red-400' 
-                          : 'text-orange-400'
-                        : 'text-purple-400'
-                      : 'text-slate-400'
+                      ? isCompetitionMode && competitionModeActive 
+                        ? 'text-red-400' 
+                        : getActiveColor(tab.color).split(' ')[1]
+                      : 'text-white/40'
                   }`} 
                 />
                 <span className={`font-medium ${
-                  isActive ? 'text-white' : 'text-slate-300'
+                  isActive ? 'text-white' : 'text-white/70'
                 }`}>
                   {tab.label}
                 </span>
@@ -86,7 +97,7 @@ export const CompeteTabs: React.FC<CompeteTabsProps> = ({
                 )}
               </div>
               <p className={`text-sm ${
-                isActive ? 'text-slate-300' : 'text-slate-400'
+                isActive ? 'text-white/70' : 'text-white/50'
               }`}>
                 {tab.description}
               </p>
