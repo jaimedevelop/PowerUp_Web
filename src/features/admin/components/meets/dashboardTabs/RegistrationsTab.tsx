@@ -9,7 +9,7 @@ import {
   Calendar,
   Award,
   Dumbbell,
-  Users,
+  Users, 
   RefreshCw,
   CheckCircle,
   Clock
