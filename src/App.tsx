@@ -27,11 +27,14 @@ import EmailVerificationError from './features/shared/auth/emails/EmailVerificat
 
 import { AuthProvider } from './contexts/shared/AuthContext';
 
+import ThemeProvider from './styles/ThemeProvider';
+
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <Routes>
+        <ThemeProvider>
+          <Routes>
           {/* Authentication Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -128,7 +131,8 @@ function App() {
           
           {/* Catch all - redirect to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+          </Routes>
+        </ThemeProvider>
       </Router>
     </AuthProvider>
   );

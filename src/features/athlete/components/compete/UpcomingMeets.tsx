@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Trophy, Users } from 'lucide-react';
+import { tw, getButtonClass } from '../../../../styles/theme';
 
 // @ts-ignore - Ignore TypeScript checking for this import
 import { getUpcomingMeets } from '../../../../firebase/database';
@@ -69,15 +70,15 @@ export const UpcomingMeets: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+      <div className={`${tw.glassCard} ${tw.glassCardHover} p-6`}>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
-            <Calendar className="w-6 h-6 text-green-400 mr-3" />
-            <h3 className="text-xl font-semibold text-white">Upcoming Meets</h3>
+            <Calendar className="w-6 h-6 text-[var(--action-green-to)] mr-3" />
+            <h3 className="text-xl font-semibold text-[color:var(--text-primary)]">Upcoming Meets</h3>
           </div>
         </div>
         <div className="flex justify-center items-center h-40">
-          <div className="text-slate-400">Loading meets...</div>
+          <div className="text-[color:var(--text-secondary)]">Loading meets...</div>
         </div>
       </div>
     );
@@ -85,69 +86,71 @@ export const UpcomingMeets: React.FC = () => {
 
   if (error) {
     return (
-      <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+      <div className={`${tw.glassCard} ${tw.glassCardHover} p-6`}>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center">
-            <Calendar className="w-6 h-6 text-green-400 mr-3" />
-            <h3 className="text-xl font-semibold text-white">Upcoming Meets</h3>
+            <Calendar className="w-6 h-6 text-[var(--action-green-to)] mr-3" />
+            <h3 className="text-xl font-semibold text-[color:var(--text-primary)]">Upcoming Meets</h3>
           </div>
         </div>
         <div className="flex justify-center items-center h-40">
-          <div className="text-red-400">{error}</div>
+          <div className="text-[var(--action-red-from)]">{error}</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+    <div className={`${tw.glassCard} ${tw.glassCardHover} p-6`}>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
-          <Calendar className="w-6 h-6 text-green-400 mr-3" />
-          <h3 className="text-xl font-semibold text-white">Upcoming Meets</h3>
+          <Calendar className="w-6 h-6 text-[var(--action-green-to)] mr-3" />
+          <h3 className="text-xl font-semibold text-[color:var(--text-primary)]">Upcoming Meets</h3>
         </div>
-        <button className="text-green-400 hover:text-green-300 text-sm font-medium transition-colors">
+        <button className={`text-[var(--action-green-to)] hover:text-[var(--action-green-hover)] text-sm font-medium transition-colors`}>
           View All
         </button>
       </div>
       
       {upcomingMeets.length === 0 ? (
         <div className="flex justify-center items-center h-40">
-          <div className="text-slate-400">No upcoming meets found</div>
+          <div className="text-[color:var(--text-secondary)]">No upcoming meets found</div>
         </div>
       ) : (
         <div className="space-y-4">
           {upcomingMeets.map((meet) => (
-            <div key={meet.id} className="bg-slate-700 rounded-lg p-4 border border-slate-600 hover:border-slate-500 transition-colors">
+            <div key={meet.id} className={`${tw.glassCard} p-4 hover:border-[color:var(--glass-border-hover)] transition-colors`}>
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h4 className="font-semibold text-white">{meet.name}</h4>
-                  <p className="text-sm text-slate-400">{meet.federation} • {meet.date}</p>
+                  <h4 className="font-semibold text-[color:var(--text-primary)]">{meet.name}</h4>
+                  <p className="text-sm text-[color:var(--text-secondary)]">{meet.federation} • {meet.date}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-green-400">{meet.daysUntil}</p>
-                  <p className="text-xs text-slate-400">days</p>
+                  <p className="text-2xl font-bold text-[var(--action-green-to)]">{meet.daysUntil}</p>
+                  <p className="text-xs text-[color:var(--text-tertiary)]">days</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm mb-3">
-                <div className="flex items-center text-slate-300">
-                  <MapPin className="w-4 h-4 text-slate-400 mr-2" />
+                <div className="flex items-center text-[color:var(--text-secondary)]">
+                  <MapPin className="w-4 h-4 text-[color:var(--text-tertiary)] mr-2" />
                   <span>{meet.location}</span>
                 </div>
-                <div className="flex items-center text-slate-300">
-                  <Clock className="w-4 h-4 text-slate-400 mr-2" />
+                <div className="flex items-center text-[color:var(--text-secondary)]">
+                  <Clock className="w-4 h-4 text-[color:var(--text-tertiary)] mr-2" />
                   <span>{meet.flightTime}</span>
                 </div>
-                <div className="flex items-center text-slate-300">
-                  <Trophy className="w-4 h-4 text-slate-400 mr-2" />
+                <div className="flex items-center text-[color:var(--text-secondary)]">
+                  <Trophy className="w-4 h-4 text-[color:var(--text-tertiary)] mr-2" />
                   <span>{meet.weightClass}</span>
                 </div>
-                <div className="flex items-center text-slate-300">
-                  <Users className="w-4 h-4 text-slate-400 mr-2" />
+                <div className="flex items-center text-[color:var(--text-secondary)]">
+                  <Users className="w-4 h-4 text-[color:var(--text-tertiary)] mr-2" />
                   <span className={
-                    meet.status === 'Registered' ? 'text-green-400' : 
-                    meet.status === 'Registration Open' ? 'text-yellow-400' : 
-                    'text-slate-400'
+                    meet.status === 'Registered'
+                      ? 'text-[var(--action-green-to)]'
+                      : meet.status === 'Registration Open'
+                      ? 'text-[var(--action-yellow-to)]'
+                      : 'text-[color:var(--text-tertiary)]'
                   }>
                     {meet.status}
                   </span>
@@ -155,7 +158,7 @@ export const UpcomingMeets: React.FC = () => {
               </div>
               <button 
                 onClick={() => navigate(`/compete/meet/${meet.id}`)}
-                className="w-full bg-slate-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-slate-500 transition-colors"
+                className={`w-full ${getButtonClass('yellow')} py-2 px-4 rounded-lg font-medium`}
               >
                 View Meet Details
               </button>
@@ -165,12 +168,12 @@ export const UpcomingMeets: React.FC = () => {
       )}
       
       {/* Quick Actions */}
-      <div className="mt-6 pt-6 border-t border-slate-700">
+      <div className="mt-6 pt-6 border-t border-[color:var(--glass-border)]">
         <div className="grid grid-cols-2 gap-3">
-          <button className="bg-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-purple-700 transition-colors text-sm">
+          <button className={` ${getButtonClass('red')} text-white py-2 px-4 rounded-lg font-medium text-sm`}>
             Find More Meets
           </button>
-          <button className="bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
+          <button className={` ${getButtonClass('green')} text-white py-2 px-4 rounded-lg font-medium text-sm`}>
             Meet History
           </button>
         </div>

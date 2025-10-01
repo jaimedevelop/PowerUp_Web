@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { Home, Trophy, Dumbbell, Users, User, LogOut } from 'lucide-react';
+import { tw } from '../../../styles/theme';
 
 export type TabType = 'feed' | 'compete' | 'train' | 'connect' | 'profile';
 
@@ -20,7 +21,7 @@ const navItems = [
 // Sidebar for desktop and tablet
 const Sidebar: React.FC = () => {
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-slate-900 border-r border-slate-700 z-40 lg:w-64 md:w-16 hidden md:block">
+    <aside className="fixed left-0 top-0 h-full w-64 bg-[var(--glass-bg)] border-r border-[var(--glass-border)] z-40 lg:w-64 md:w-16 hidden md:block">
       {/* Logo Area */}
       <div className="p-6 border-b border-slate-700">
         <div className="flex items-center space-x-3">
@@ -86,7 +87,7 @@ const BottomNav: React.FC = () => {
   const activeTab = getCurrentTab();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-gray-200 px-4 py-2 shadow-lg md:hidden z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-[var(--bg-primary)] border-t border-[var(--glass-border)] px-4 py-2 shadow-lg md:hidden z-50">
       <div className="flex justify-around items-center max-w-lg mx-auto">
         {navItems.map(({ path, id, label, icon: IconComponent }) => {
           const isActive = activeTab === id;
@@ -142,7 +143,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className={tw.pageBackground}>
       <Navigation />
       
       {/* Main content area */}
