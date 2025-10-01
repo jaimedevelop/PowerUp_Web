@@ -20,8 +20,6 @@ import MeetDetailsPage from './features/athlete/components/compete/MeetDetailsPa
 import LandingPage from './features/athlete/pages/LandingPage';
 import LoginPage from './features/shared/auth/LoginPage';
 import CreateAccountPage from './features/shared/auth/CreateAccountPage';
-
-// Email Verification Components
 import EmailVerificationPending from './features/shared/auth/emails/EmailVerificationPending';
 import EmailVerification from './features/shared/auth/emails/EmailVerification';
 import EmailVerificationSuccess from './features/shared/auth/emails/EmailVerificationSuccess';
