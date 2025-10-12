@@ -21,8 +21,8 @@ import { Meet } from '../../../../../types/admin/meet-types';
 
 // Import tab components
 import OverviewTab from './dashboardTabs/OverviewTab';
-import RegistrationsTab from './dashboardTabs/RegistrationsTab';
-import FlightsTab from './dashboardTabs/FlightsTab';
+import RegistrationsTab from './dashboardTabs/registrationsTab/RegistrationsTab';
+import FlightsTab from './dashboardTabs/flightsTab/FlightsTab';
 import WeighInTab from './dashboardTabs/WeighInTab';
 import CommunicationsTab from './dashboardTabs/CommunicationsTab';
 import LiveTab from './dashboardTabs/LiveTab';

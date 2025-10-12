@@ -14,8 +14,8 @@ import {
   CheckCircle,
   Clock
 } from 'lucide-react';
-import { MeetData } from '../../../../../../firebase';
-import { AdminRegistrationService } from '../../../../../../services/admin/registrations';
+import { MeetData } from '../../../../../../../firebase';
+import { AdminRegistrationService } from '../../../../../../../services/admin/registrations';
 
 interface Registration {
   id: string;
